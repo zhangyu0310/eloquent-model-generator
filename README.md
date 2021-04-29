@@ -2,7 +2,42 @@
 
 Eloquent Model Generator is a tool based on [Code Generator](https://github.com/krlove/code-generator) for generating Eloquent models.
 
+## 说明
+
+这个仓库是从原开发者那边fork的，基于版本1.3.7
+
+由于开发中遇到了一些小问题，对源码进行了少量修改。
+
+修改如下：
+
+1. 工具会默认忽略表的主键，不会将其添加到`$fillable`字段中。（原因应该是大部分使用者的数据库主键是Auto Increment ）
+
+我目前的项目中，这个字段并不是自增的，如果不将主键增加到`$fillable`中，没办法使用`fill($request->all())`之类的方法直接填充。
+
+> 解决办法：
+我增加了一个参数 `--pk-fillable` (Primary Key fillable)，是一个`VALUE_NONE`。 指定了这个参数后，主键也会被添加到`$fillable`中。
+
+2. 工具在检查外键关系时，会扫描其它的表（`table-name`指定之外的表）
+
+在这个时候，如果其它表中的列，有一些很特殊的类型，例如`bit`类型。程序就会抛出异常，没有办法正常工作。我发现这个问题，是因为这边使用了`Liquibase`生成数据库表，而`Liquibase`会生成一张名为`databasechangeloglock`的表：
+```sql
+CREATE TABLE `databasechangeloglock` (
+  `ID` int(11) NOT NULL,
+  `LOCKED` bit(1) NOT NULL,
+  `LOCKGRANTED` datetime DEFAULT NULL,
+  `LOCKEDBY` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+```
+根本原因是调用`DBAL`的`listTables()`时，对于其不支持的类型（`bit`类型）抛出的异常。
+
+> 解决办法：
+> 我这里的解决办法比较简单粗暴，仅适合没有使用外键的业务。（从一个前数据库开发人员的角度来说，外键还是能不用就不用，效率很差，而且很多分布式数据库不支持外键）
+>
+> `--ignore-fk` (Ignore Foreign Key)，是一个`VALUE_NONE`。指定了这个参数后，工具会跳过外键关系的检查。
+
 ## Installation
+
 Step 1. Add Eloquent Model Generator to your project:
 ```
 composer require krlove/eloquent-model-generator --dev

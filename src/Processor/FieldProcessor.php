@@ -52,10 +52,11 @@ class FieldProcessor implements ProcessorInterface
         foreach ($tableDetails->getColumns() as $column) {
             $model->addProperty(new VirtualPropertyModel(
                 $column->getName(),
+                $column->getComment(),
                 $this->typeRegistry->resolveType($column->getType()->getName())
             ));
 
-            if (!in_array($column->getName(), $primaryColumnNames)) {
+            if ($config->get('pk_fillable') || !in_array($column->getName(), $primaryColumnNames)) {
                 $columnNames[] = $column->getName();
             }
         }

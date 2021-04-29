@@ -72,6 +72,9 @@ class RelationProcessor implements ProcessorInterface
             $this->addRelation($model, $relation);
         }
 
+        if ($config->get("ignore_fk") != null) {
+            return;
+        }
         $tables = $schemaManager->listTables();
         foreach ($tables as $table) {
             if ($table->getName() === $prefix . $model->getTableName()) {

@@ -8,4 +8,6 @@ return [
     'date_format'     => null,
     'connection'      => null,
     'backup'          => null,
+    'pk_fillable'     => null,
+    'ignore_fk'       => null,
 ];
