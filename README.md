@@ -15,7 +15,8 @@ Eloquent Model Generator is a tool based on [Code Generator](https://github.com/
 我目前的项目中，这个字段并不是自增的，如果不将主键增加到`$fillable`中，没办法使用`fill($request->all())`之类的方法直接填充。
 
 > 解决办法：
-我增加了一个参数 `--pk-fillable` (Primary Key fillable)，是一个`VALUE_NONE`。 指定了这个参数后，主键也会被添加到`$fillable`中。
+>
+> 我增加了一个参数 `--pk-fillable` (Primary Key fillable)，是一个`VALUE_NONE`。 指定了这个参数后，主键也会被添加到`$fillable`中。
 
 2. 工具在检查外键关系时，会扫描其它的表（`table-name`指定之外的表）
 
@@ -32,9 +33,21 @@ CREATE TABLE `databasechangeloglock` (
 根本原因是调用`DBAL`的`listTables()`时，对于其不支持的类型（`bit`类型）抛出的异常。
 
 > 解决办法：
+> 
 > 我这里的解决办法比较简单粗暴，仅适合没有使用外键的业务。（从一个前数据库开发人员的角度来说，外键还是能不用就不用，效率很差，而且很多分布式数据库不支持外键）
 >
 > `--ignore-fk` (Ignore Foreign Key)，是一个`VALUE_NONE`。指定了这个参数后，工具会跳过外键关系的检查。
+
+3. 这个可以算是一点点小特性。生成的model，它头部会有字段的说明。我在这个说明后面加了数据库表列上的COMMENT。会生成类似这样的model文件：
+```php
+/**
+ * @property integer $ServerID // 服务器ID
+ * @property string $Name // 服务器名称
+ * @property string $IP // IP地址
+ * @property int $Port // 端口号
+ */
+```
+不过这个功能需要配合我Git下的 [Code Generator](https://github.com/zhangyu0310/code-generator) 仓库里的代码生成器使用。（也是修改了一点点内容）
 
 ## Installation
 
